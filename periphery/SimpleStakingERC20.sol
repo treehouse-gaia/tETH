@@ -8,13 +8,18 @@ import { ReentrancyGuard } from '@openzeppelin/contracts/utils/ReentrancyGuard.s
 import { Ownable, Ownable2Step } from '@openzeppelin/contracts/access/Ownable2Step.sol';
 
 interface ISimpleStakingERC20 {
-  /// @notice Struct to hold the supported booleans
+  /// @notice Struct to hold the supported params
   /// @param deposit true if deposit is supported
   /// @param withdraw true if withdraw is supported
+  /// @param depositCap if `depositCap` < type(uint128).max, deposit limit will be enforced
   struct Supported {
     bool deposit;
     bool withdraw;
+    uint128 depositCap;
   }
+
+  /// @notice Error emitted when deposit cap is exceeded
+  error DEPOSIT_CAP_EXCEEDED();
 
   /// @notice Error emitted when the amount is null
   error AMOUNT_NULL();
@@ -125,6 +130,9 @@ contract SimpleStakingERC20 is Ownable2Step, ReentrancyGuard, ISimpleStakingERC2
     if (!supportedTokens[_token].deposit) revert TOKEN_NOT_ALLOWED(_token);
 
     uint256 bal = _token.balanceOf(address(this));
+    if (bal + _amount > supportedTokens[_token].depositCap && supportedTokens[_token].depositCap < type(uint128).max)
+      revert DEPOSIT_CAP_EXCEEDED();
+
     _token.safeTransferFrom(msg.sender, address(this), _amount);
     _amount = _token.balanceOf(address(this)) - bal; // To handle deflationary tokens
 

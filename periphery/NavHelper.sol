@@ -156,7 +156,7 @@ contract NavHelper is INavHelper {
       // nav in eth
       _nav = (navInBase * 1e10 * PRECISION) / RATE_PROVIDER_REGISTRY.getEthInUsd();
 
-      _nav = IwstETH(payable(unStETH.WSTETH())).getWstETHByStETH(_priceEthInSteth(_nav));
+      _nav = IwstETH(payable(unStETH.WSTETH())).getWstETHByStETH(_nav);
     }
   }
 

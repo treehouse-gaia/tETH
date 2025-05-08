@@ -3,18 +3,18 @@ pragma solidity =0.8.24;
 
 import '../../libs/TokenUtils.sol';
 import '../ActionBase.sol';
-import './helpers/AaveV3Helper.sol';
+import './helpers/SparkHelper.sol';
 import { IProtocolPoolController } from '../../controllers/ProtocolPoolController.sol';
 
-/// @title Withdraw a token from an Aave market
-contract AaveV3Withdraw is ActionBase, AaveV3Helper {
+/// @title Withdraw a token from an Spark market
+contract SparkWithdraw is ActionBase, SparkHelper {
   using TokenUtils for address;
   address public immutable PROTOCOL_CONTROLLER;
-  string constant NAME = 'AaveV3Withdraw';
+  string constant NAME = 'SparkWithdraw';
 
   /// @param amount - amount of token to withdraw
-  /// @param assetId - id of aave V3 asset
-  /// @param poolId - pool id of aave V3
+  /// @param assetId - id of Spark asset
+  /// @param poolId - pool id of spark
   struct Params {
     uint amount;
     uint16 assetId;
@@ -47,7 +47,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
   //////////////////////////// ACTION LOGIC ////////////////////////////
 
-  /// @notice User withdraws tokens from the Aave protocol
+  /// @notice User withdraws tokens from the Spark protocol
   /// @param _assetId The id of the token to be deposited
   /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
   /// @param _poolId The id of the pool

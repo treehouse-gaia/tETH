@@ -3,18 +3,18 @@ pragma solidity =0.8.24;
 
 import '../../libs/TokenUtils.sol';
 import '../ActionBase.sol';
-import './helpers/AaveV3Helper.sol';
+import './helpers/SparkHelper.sol';
 import { IProtocolPoolController } from '../../controllers/ProtocolPoolController.sol';
 
-/// @title Payback a token a user borrowed from an Aave market
-contract AaveV3Payback is ActionBase, AaveV3Helper {
+/// @title Payback a token a user borrowed from an Spark market
+contract SparkPayback is ActionBase, SparkHelper {
   using TokenUtils for address;
   address public immutable PROTOCOL_CONTROLLER;
-  string constant NAME = 'AaveV3Payback';
+  string constant NAME = 'SparkPayback';
 
   /// @param amount - amount of token to payback
-  /// @param assetId - id of aave V3 asset
-  /// @param poolId - pool id of aave V3
+  /// @param assetId - id of Spark asset
+  /// @param poolId - pool id of spark
   struct Params {
     uint amount;
     uint16 assetId;
@@ -47,7 +47,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
 
   //////////////////////////// ACTION LOGIC ////////////////////////////
 
-  /// @notice User paybacks tokens to the Aave protocol
+  /// @notice User paybacks tokens to the Spark protocol
   /// @dev User needs to approve its wallet to pull the _tokenAddr tokens
   /// @param _assetId The id of the underlying asset to be repaid
   /// @param _amount Amount of tokens to be paid back
@@ -59,6 +59,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
       _poolId
     );
     address tokenAddr = IPoolV3(_lendingPool).getReserveAddressById(_assetId);
+
     uint maxDebt = getWholeDebt(tokenAddr, address(this), _poolDataProvider);
     _amount = _amount > maxDebt ? maxDebt : _amount;
 

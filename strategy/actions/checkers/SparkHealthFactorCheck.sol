@@ -3,13 +3,13 @@ pragma solidity =0.8.24;
 
 import '../ActionBase.sol';
 import '../../../interfaces/aaveV3/IPoolV3.sol';
-import '../aaveV3/helpers/AaveV3Helper.sol';
+import '../spark/helpers/SparkHelper.sol';
 import { IProtocolPoolController } from '../../controllers/ProtocolPoolController.sol';
 
-contract AaveV3HealthFactorCheck is ActionBase, AaveV3Helper {
+contract SparkHealthFactorCheck is ActionBase, SparkHelper {
   error BadAfterCheck(uint currHf, uint targetHf);
   address public immutable PROTOCOL_CONTROLLER;
-  string constant NAME = 'AaveV3HealthFactorCheck';
+  string constant NAME = 'SparkHealthFactorCheck';
 
   /// @inheritdoc ActionBase
   function getId() public pure override returns (bytes4) {

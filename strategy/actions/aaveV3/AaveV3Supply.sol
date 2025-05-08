@@ -4,18 +4,26 @@ pragma solidity =0.8.24;
 import '../../libs/TokenUtils.sol';
 import '../ActionBase.sol';
 import './helpers/AaveV3Helper.sol';
+import { IProtocolPoolController } from '../../controllers/ProtocolPoolController.sol';
 
 /// @title Supply a token to an Aave market
 /// @dev 0xfc33bf00
 contract AaveV3Supply is ActionBase, AaveV3Helper {
   using TokenUtils for address;
+  address public immutable PROTOCOL_CONTROLLER;
   string constant NAME = 'AaveV3Supply';
 
   /// @param amount - amount of token to supply
   /// @param assetId - id of aave V3 asset
+  /// @param poolId - pool id of aave V3
   struct Params {
     uint amount;
     uint16 assetId;
+    uint16 poolId;
+  }
+
+  constructor(address _protocolRegisterAddress) {
+    PROTOCOL_CONTROLLER = _protocolRegisterAddress;
   }
 
   /// @inheritdoc ActionBase
@@ -33,7 +41,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     params.amount = _parseParamUint(params.amount, _paramMapping[0], _returnValues);
     params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[1], _returnValues));
 
-    (uint supplyAmount, bytes memory logData) = _supply(params.amount, params.assetId);
+    (uint supplyAmount, bytes memory logData) = _supply(params.amount, params.assetId, params.poolId);
     emit ActionEvent(NAME, logData);
     return bytes32(supplyAmount);
   }
@@ -44,17 +52,18 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
   /// @dev User needs to approve its wallet to pull the tokens being supplied
   /// @param _amount Amount of tokens to be deposited
   /// @param _assetId The id of the token to be deposited
-  function _supply(uint _amount, uint16 _assetId) internal returns (uint, bytes memory) {
-    IPoolV3 lendingPool = IPoolV3(LENDING_POOL);
-    address tokenAddr = lendingPool.getReserveAddressById(_assetId);
+  /// @param _poolId The id of the pool
+  function _supply(uint _amount, uint16 _assetId, uint16 _poolId) internal returns (uint, bytes memory) {
+    address _lendingPool = IProtocolPoolController(PROTOCOL_CONTROLLER).getPoolAddress(PROTOCOL_ID, _poolId);
+    address tokenAddr = IPoolV3(_lendingPool).getReserveAddressById(_assetId);
 
     // if amount is set to max, take the whole _from balance
     if (_amount == type(uint).max) {
       _amount = tokenAddr.getBalance(address(this));
     }
     // approve aave pool to pull tokens
-    tokenAddr.approveToken(address(lendingPool), _amount);
-    lendingPool.supply(tokenAddr, _amount, address(this), AAVE_REFERRAL_CODE);
+    tokenAddr.approveToken(address(_lendingPool), _amount);
+    IPoolV3(_lendingPool).supply(tokenAddr, _amount, address(this), AAVE_REFERRAL_CODE);
 
     bytes memory logData = abi.encode(tokenAddr, _amount);
     return (_amount, logData);

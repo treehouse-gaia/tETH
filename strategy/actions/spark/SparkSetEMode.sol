@@ -3,17 +3,17 @@ pragma solidity =0.8.24;
 
 import '../../libs/TokenUtils.sol';
 import '../ActionBase.sol';
-import './helpers/AaveV3Helper.sol';
+import './helpers/SparkHelper.sol';
 import { IProtocolPoolController } from '../../controllers/ProtocolPoolController.sol';
 
-/// @title Set positions eMode on Aave v3
-contract AaveV3SetEMode is ActionBase, AaveV3Helper {
+/// @title Set positions eMode on Spark
+contract SparkSetEMode is ActionBase, SparkHelper {
   using TokenUtils for address;
   address public immutable PROTOCOL_CONTROLLER;
-  string constant NAME = 'AaveV3SetEMode';
+  string constant NAME = 'SparkSetEMode';
 
   /// @param categoryId - eMode category id
-  /// @param poolId - pool id of aave V3
+  /// @param poolId - pool id of spark
   struct Params {
     uint8 categoryId;
     uint16 poolId;
